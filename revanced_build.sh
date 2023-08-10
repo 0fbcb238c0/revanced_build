@@ -1,40 +1,56 @@
 #!/bin/bash
-# Downloading Revanced Integrations
-    int_vers=$(curl -sL https://github.com/ReVanced/revanced-integrations | grep tag/ | cut -d \" -f 8 | cut -d \/ -f 6 | tr -d v)
-echo Current Integrations: v$int_vers
-echo Downloading Integrations APK:
-    wget -nc -q https://github.com/ReVanced/revanced-integrations/releases/download/v$int_vers/revanced-integrations-$int_vers.apk
-echo Done!
-# Downloading Revanced-CLI
-    cli_vers=$(curl -sL https://github.com/revanced/revanced-cli | grep tag/ | cut -d \" -f 8 | cut -d \/ -f 6 | tr -d v)
-echo Current Revanced-CLI: v$cli_vers
-echo Downloading Revanced-CLI JAR:
-    wget -nc -q https://github.com/ReVanced/revanced-cli/releases/download/v$cli_vers/revanced-cli-$cli_vers-all.jar
-echo Done!
-# Downloading Patches
-    patches_vers=$(curl -sL https://github.com/revanced/revanced-patches | grep tag/ | cut -d \" -f 8 | cut -d \/ -f 6 | tr -d v)
-echo Current Revanced patches: v$patches_vers
-echo Downloading Revanced patches JAR:
-    wget -nc -q https://github.com/ReVanced/revanced-patches/releases/download/v$patches_vers/revanced-patches-$patches_vers.jar
-echo Done!
-echo Recommended Youtube APK for this Release:
-    yt_vers=$(curl -sL https://github.com/ReVanced/revanced-patches/releases/download/v$patches_vers/patches.json | json_reformat | grep '"com.google.android.youtube"' -B 1 -A 10 | jq -r '.versions[]' 2> /dev/null | grep [0-9] | tail -1)
-printf "\033[32m$yt_vers\033[0m\n"
-echo Getting Download link for APK from APKmirror.com if automatic download fails:
-    web_vers=$(echo $yt_vers | tr "." "-")
-echo https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/
-# Getting Link of APK
+# Defining files
+ints_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].browser_download_url)
+cli_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].browser_download_url)
+patches_json_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[0].browser_download_url)
+patches_jar_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[1].browser_download_url)
+
+# Defining Versions
+ints=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].name)
+cli=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].name)
+patches=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[1].name)
+yt_vers=$(curl -sL "$patches_json_url" | jq -r '.[0].compatiblePackages[].versions[-1]')
+web_vers=$(echo $yt_vers | tr "." "-")
+
+if [ ! -e $ints ] && [ ! -e $cli ] && [ ! -e $patches ];
+then
+    echo Downloading files:
+    wget -nc -q $ints_url
+    wget -nc -q $cli_url
+    wget -nc -q $patches_jar_url
+fi
+
+# Downloading Youtube APK from apkmirror.com
+if [ ! -e com.google.youtube.com_$yt_vers.apk ]
+then
+    echo -e "Recommended Youtube APK for this Release: \033[32;1m$yt_vers"
     link1=$(curl -sL "https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/youtube-$web_vers-2-android-apk-download/" --user-agent Firefox | grep forcebaseapk | cut -d \" -f 6)
     link2=$(curl -sL "https://www.apkmirror.com$link1" --user-agent Firefox | grep download.php? | cut -d \" -f 12 | sed 's/amp;//')
 echo Download Youtube APK Version $yt_vers
-#echo "https://www.apkmirror.com$link2"
     wget -nc --user-agent Firefox "https://www.apkmirror.com$link2" -O com.google.youtube.com_$yt_vers.apk
+fi
+
+# Building Revanced APK, if it does not exist
 if [ -e "revanced_$yt_vers.apk" ]
 then
     echo APK exists, not building
     exit 1
 else
+    read -p "Clean up afterwards? [y/N]" clean
     echo Building the Youtube Revanced APK:
-    java -Djava.awt.headless=true -jar revanced-cli-$cli_vers-all.jar -a com.google.youtube.com_$yt_vers.apk -b revanced-patches-$patches_vers.jar -m revanced-integrations-$int_vers.apk -i selected_patches_*.json -o revanced_$yt_vers.apk
+    java -Djava.awt.headless=true  \
+    -jar $cli \
+    -a com.google.youtube.com_$yt_vers.apk \
+    -b $patches \
+    -m $ints \
+    -i selected_patches_*.json \
+    -o revanced_$yt_vers.apk
+    if [ $clean == 'y|Y' ]
+    then
+    echo Cleaning up...
+    rm $cli \
+    $patches \
+    $ints
+    fi
     exit 0
 fi
