@@ -28,8 +28,8 @@ fi
 if [ ! -e com.google.youtube.com_$yt_vers.apk ]
 then
     echo -e "Recommended Youtube APK for this Release: \033[32;1m$yt_vers"
-    link1=$(curl -sL "https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/youtube-$web_vers-2-android-apk-download/" --user-agent Firefox | grep forcebaseapk | cut -d \" -f 6)
-    link2=$(curl -sL "https://www.apkmirror.com$link1" --user-agent Firefox | grep download.php? | cut -d \" -f 12 | sed 's/amp;//')
+    link1=$(curl --user-agent Firefox -sL "https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/youtube-$web_vers-2-android-apk-download/" | grep forcebaseapk | cut -d \" -f 6)
+    link2=$(curl --user-agent Firefox -sL "https://www.apkmirror.com$link1" | grep download.php? | cut -d \" -f 12 | sed 's/amp;//')
 echo Download Youtube APK Version $yt_vers
     wget -nc --user-agent Firefox "https://www.apkmirror.com$link2" -O com.google.youtube.com_$yt_vers.apk
 fi
