@@ -12,12 +12,16 @@ patches=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/release
 yt_vers=$(curl -sL "$patches_json_url" | jq -r '.[0].compatiblePackages[].versions[-1]')
 web_vers=$(echo $yt_vers | tr "." "-")
 
-if [ ! -e $ints ] && [ ! -e $cli ] && [ ! -e $patches ];
+if [ ! $ints_url = null ] && [ ! -e $patches ]
 then
-    echo Downloading files:
+    echo "Downloading files:"
     wget -nc -q $ints_url
     wget -nc -q $cli_url
     wget -nc -q $patches_jar_url
+    echo "Done!"
+else
+    echo "API limit exceeded, wait for a few minutes"
+    exit 1
 fi
 
 # Downloading Youtube APK from apkmirror.com
@@ -34,23 +38,30 @@ fi
 if [ -e "revanced_$yt_vers.apk" ]
 then
     echo APK exists, not building
-    exit 1
+    exit 2
 else
     read -p "Clean up afterwards? [y/N]" clean
-    echo Building the Youtube Revanced APK:
-    java -Djava.awt.headless=true  \
+    echo "Building the Youtube Revanced APK:"
+    java -Djava.awt.headless=true \
     -jar $cli \
     -a com.google.youtube.com_$yt_vers.apk \
     -b $patches \
     -m $ints \
     -i selected_patches_*.json \
     -o revanced_$yt_vers.apk
-    if [ $clean == 'y|Y' ]
+    if [ $clean == '[y|Y]' ]
     then
-    echo Cleaning up...
-    rm $cli \
-    $patches \
-    $ints
+        "echo Cleaning up..."
+        rm -v \
+        $cli \
+        $patches \
+        $ints \
+        revanced_$yt_vers.apk
+        exit 0
+    else
+        echo "Invalid input! Keeping files"
+        exit 3
     fi
+    echo "Done!"
     exit 0
 fi
