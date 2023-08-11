@@ -37,7 +37,7 @@ fi
 # Building Revanced APK, if it does not exist
 if [ -e "revanced_$yt_vers.apk" ]
 then
-    echo APK exists, not building
+    echo "APK exists, not building"
     exit 2
 else
     read -p "Clean up afterwards? [y/N]" clean
@@ -51,7 +51,7 @@ else
     -o revanced_$yt_vers.apk
     if [ $clean == '[y|Y]' ]
     then
-        "echo Cleaning up..."
+        echo "Cleaning up..."
         rm -v \
         $cli \
         $patches \
