@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# Check Ratelimit
+rt=$(curl https://api.github.com/rate_limit | jq .rate.remaining)
 # Defining files
 ints_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].browser_download_url)
 cli_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].browser_download_url)
@@ -12,7 +15,7 @@ patches=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/release
 yt_vers=$(curl -sL "$patches_json_url" | jq -r '.[0].compatiblePackages[].versions[-1]')
 web_vers=$(echo $yt_vers | tr "." "-")
 
-if [ ! $ints_url = null ] && [ ! -e $patches ]
+if [ $rt -ge "8" ]
 then
     echo "Downloading files:"
     wget -nc -q $ints_url
@@ -49,7 +52,7 @@ else
     -m $ints \
     -i selected_patches_*.json \
     -o revanced_$yt_vers.apk
-    if [ $clean == '[y|Y]' ]
+    if [[ $clean =~ ^[yY]$ ]]
     then
         echo "Cleaning up..."
         rm -v \
@@ -59,7 +62,7 @@ else
         revanced_$yt_vers.apk
         exit 0
     else
-        echo "Invalid input! Keeping files"
+        echo "Keeping files"
         exit 3
     fi
     echo "Done!"
