@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check Ratelimit
-rt=$(curl https://api.github.com/rate_limit | jq .rate.remaining)
+rt=$(curl -s https://api.github.com/rate_limit | jq .rate.remaining)
 # Defining files
 ints_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].browser_download_url)
 cli_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].browser_download_url)
