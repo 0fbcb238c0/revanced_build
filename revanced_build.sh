@@ -49,7 +49,7 @@ else
     -a com.google.youtube.com_$yt_vers.apk \
     -b $patches \
     -m $ints \
-    -i selected_patches_*.json \
+    -i selected_patches.json \
     -o revanced_$yt_vers.apk
     echo "Done!"
     exit 0
