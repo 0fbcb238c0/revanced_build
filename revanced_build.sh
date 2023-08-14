@@ -18,9 +18,9 @@ web_vers=$(echo $yt_vers | tr "." "-")
 if [ $rt -ge "8" ]
 then
     echo "Downloading files:"
-    curl -o $ints_url
-    curl -o $cli_url
-    curl -o $patches_jar_url
+    wget -nc -q $ints_url
+    wget -nc -q $cli_url
+    wget -nc -q $patches_jar_url
     echo "Done!"
 else
     echo "API limit exceeded, wait for a few minutes"
@@ -34,7 +34,7 @@ then
     link1=$(curl --user-agent Firefox -sL "https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/youtube-$web_vers-2-android-apk-download/" | grep forcebaseapk | cut -d \" -f 6)
     link2=$(curl --user-agent Firefox -sL "https://www.apkmirror.com$link1" | grep download.php? | cut -d \" -f 12 | sed 's/amp;//')
 echo Download Youtube APK Version $yt_vers
-    curl -s --user-agent Firefox "https://www.apkmirror.com$link2" --output com.google.youtube.com_$yt_vers.apk
+    wget -nc --user-agent Firefox "https://www.apkmirror.com$link2" -O com.google.youtube.com_$yt_vers.apk
 fi
 
 # Building Revanced APK, if it does not exist
