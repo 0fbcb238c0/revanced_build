@@ -31,7 +31,7 @@ fi
 if [ ! -e com.google.youtube.com_$yt_vers.apk ]
 then
     echo -e "Recommended Youtube APK for this Release: \033[32;1m$yt_vers\033[0m"
-    link1=$(curl --user-agent Firefox -sL "https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/youtube-$web_vers-2-android-apk-download/" | grep forcebaseapk | cut -d \" -f 6)
+    link1=$(curl --user-agent Firefox -sL "https://www.apkmirror.com/apk/google-inc/youtube/youtube-$web_vers-release/youtube-$web_vers-android-apk-download/" | grep forcebaseapk | cut -d \" -f 6)
     link2=$(curl --user-agent Firefox -sL "https://www.apkmirror.com$link1" | grep download.php? | cut -d \" -f 12 | sed 's/amp;//')
 echo Download Youtube APK Version $yt_vers
     wget -nc --user-agent Firefox "https://www.apkmirror.com$link2" -O com.google.youtube.com_$yt_vers.apk
@@ -46,7 +46,7 @@ else
     echo "Building the Youtube Revanced APK:"
     java -Djava.awt.headless=true \
     -jar $cli \
-    -a com.google.youtube.com_$yt_vers.apk \
+    patch com.google.youtube.com_$yt_vers.apk \
     -b $patches \
     -m $ints \
     -i selected_patches.json \
