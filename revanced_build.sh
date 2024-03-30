@@ -12,7 +12,7 @@ patches_jar_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches
 ints=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].name)
 cli=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].name)
 patches=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[1].name)
-yt_vers=$(curl -sL "$patches_json_url" | jq -r '.[0].compatiblePackages[].versions[-1]')
+yt_vers=$(java -jar $cli list-versions $patches -f com.google.android.youtube | tr "\tb" "\n" | tr " " "\n" | grep ^[0-9] | sort | tail -1)
 web_vers=$(echo $yt_vers | tr "." "-")
 
 if [ $rt -ge "8" ]
