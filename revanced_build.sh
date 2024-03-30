@@ -8,13 +8,6 @@ cli_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/la
 patches_json_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[0].browser_download_url)
 patches_jar_url=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[1].browser_download_url)
 
-# Defining Versions
-ints=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].name)
-cli=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].name)
-patches=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[1].name)
-yt_vers=$(java -jar $cli list-versions $patches -f com.google.android.youtube | tr "\tb" "\n" | tr " " "\n" | grep ^[0-9] | sort | tail -1)
-web_vers=$(echo $yt_vers | tr "." "-")
-
 if [ $rt -ge "8" ]
 then
     echo "Downloading files:"
@@ -26,6 +19,13 @@ else
     echo "API limit exceeded, wait for a few minutes"
     exit 1
 fi
+
+# Defining Versions
+ints=$(curl -s https://api.github.com/repos/ReVanced/revanced-integrations/releases/latest | jq -r .assets[0].name)
+cli=$(curl -s https://api.github.com/repos/ReVanced/revanced-cli/releases/latest | jq -r .assets[0].name)
+patches=$(curl -s https://api.github.com/repos/ReVanced/revanced-patches/releases/latest | jq -r .assets[1].name)
+yt_vers=$(java -jar $cli list-versions $patches -f com.google.android.youtube | tr "\tb" "\n" | tr " " "\n" | grep ^[0-9] | sort | tail -1)
+web_vers=$(echo $yt_vers | tr "." "-")
 
 # Downloading Youtube APK from apkmirror.com
 if [ ! -e com.google.youtube.com_$yt_vers.apk ]
